@@ -6,6 +6,7 @@ package("opencv_android")
 
     on_install("android", function (package)
         os.cp("sdk/native/jni/include", package:installdir())
+        os.cp("sdk/native/staticlibs/$(arch)/*.so", package:installdir("lib"))
         os.cp("sdk/native/libs/$(arch)/*.so", package:installdir("lib"))
     -- os.cp("lib/$(arch)/*.dll", package:installdir("lib"))
     end)
