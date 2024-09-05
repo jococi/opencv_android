@@ -107,7 +107,20 @@ package("opencv-mobile")
         table.insert(configs, "-DCMAKE_BUILD_TYPE=" .. (package:is_debug() and "Debug" or "Release"))
          if is_plat("windows") then
              table.insert(configs, "-DBUILD_opencv_world=OFF")
+             table.insert(configs, "-DCMAKE_INSTALL_PREFIX=install")
          end
 
       import("package.tools.cmake").install(package, configs)
+    end)
+
+   on_test(function (package)
+        assert(package:check_cxxsnippets({test = [[
+           #include <opencv2/opencv.hpp>
+            #include <iostream>
+
+            int main(int argc, char** argv) {
+                std::cout << "opencv version is: "<<cv::getVersionString()<< std::endl;
+                return 0;
+            }
+        ]]}, {configs = {languages = "c++17"}}))
     end)
