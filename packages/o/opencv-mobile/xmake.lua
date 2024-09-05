@@ -2,7 +2,7 @@
 --- Created by funui.
 --- DateTime: 2024/9/5 上午11:40
 ---
-package("opencv_mobile")
+package("opencv-mobile")
     set_homepage("https://github.com/nihui/opencv-mobile")
     set_description("该项目为不同平台提供了 opencv 库的最小构建。")
    if is_plat("android") then
