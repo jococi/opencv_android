@@ -9,6 +9,9 @@ package("opencv-mobile")
     set_urls("https://github.com/nihui/opencv-mobile/releases/download/v29/opencv-mobile-$(version).zip")
     add_versions("4.10.0", "e9209285ad4d682536db4505bc06e46b94b9e56d91896e16c2853c83a870f004")
 
+    add_configs("shared", {description = "Build shared library.", default = true, type = "boolean", readonly = true})
+
+
     add_deps("cmake")
 
     on_install( function (package)
@@ -105,6 +108,14 @@ package("opencv-mobile")
              "-DBUILD_opencv_ml=OFF",
         }
         table.insert(configs, "-DCMAKE_BUILD_TYPE=" .. (package:is_debug() and "Debug" or "Release"))
+
+        if package:config("shared") then
+             table.insert(configs, "-DBUILD_SHARED_LIBS=ON")
+             table.insert(configs, "-DCMAKE_INSTALL_PREFIX=install")
+        end
+
+
+
          if is_plat("windows") then
              table.insert(configs, "-DBUILD_opencv_world=OFF")
              table.insert(configs, "-DCMAKE_INSTALL_PREFIX=install")
