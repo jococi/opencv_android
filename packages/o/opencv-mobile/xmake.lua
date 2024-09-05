@@ -23,7 +23,7 @@ package("opencv-mobile")
              "-DBUILD_WEBP=OFF",
              "-DBUILD_TBB=OFF",
              "-DBUILD_IPP_IW=OFF",
-             "-DBUILD_ITT=OFF
+             "-DBUILD_ITT=OFF",
              "-DWITH_AVFOUNDATION=OFF",
              "-DWITH_CAP_IOS=OFF",
              "-DWITH_CAROTENE=OFF",
