@@ -108,4 +108,6 @@ package("opencv-mobile")
          if is_plat("windows") then
              table.insert(configs, "-DBUILD_opencv_world=OFF")
          end
+
+      import("package.tools.cmake").install(package, configs)
     end)
