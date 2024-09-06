@@ -116,11 +116,23 @@ on_install(function(package)
     if package:is_plat("windows") then
         table.insert(configs, "-DBUILD_opencv_world=OFF")
     elseif package:is_plat("android") then
-        table.insert(configs, "-DBUILD_opencv_world=OFF")
-        table.insert(configs, "-DOPENCV_DISABLE_FILESYSTEM_SUPPORT=ON")
         table.insert(configs, "-DCMAKE_POLICY_DEFAULT_CMP0057=NEW")
-        if package:is_arch("arm64-v8a") then
+        table.insert(configs, "-DANDROID_USE_LEGACY_TOOLCHAIN_FILE=False")
+        table.insert(configs, "-DANDROID_CPP_FEATURES=\"no-rtti no-exceptions\"")
+        if package:is_arch("armeabi-v7a") then
+            table.insert(configs, "-DANDROID_ARM_NEON=ON")
+            table.insert(configs, "-DBUILD_opencv_world=OFF")
+            table.insert(configs, "-DOPENCV_DISABLE_FILESYSTEM_SUPPORT=ON")
+        elseif package:is_arch("arm64-v8a") then
+            table.insert(configs, "-DBUILD_opencv_world=OFF")
+            table.insert(configs, "-DOPENCV_DISABLE_FILESYSTEM_SUPPORT=ON")
             table.insert(configs, "-DOPENCV_EXTRA_FLAGS=\"-mno-outline-atomics\"")
+        elseif package:is_arch("x86") then
+            table.insert(configs, "-DBUILD_opencv_world=OFF")
+            table.insert(configs, "-DOPENCV_DISABLE_FILESYSTEM_SUPPORT=ON")
+        elseif package:is_arch("armeabi-v7a") then
+            table.insert(configs, "-DBUILD_opencv_world=OFF")
+            table.insert(configs, "-DOPENCV_DISABLE_FILESYSTEM_SUPPORT=ON")
         end
     end
 
