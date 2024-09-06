@@ -17,6 +17,9 @@ add_deps("cmake")
 
 
 on_install(function(package)
+
+
+
     local configs = {
         "-DBUILD_ZLIB=OFF",
         "-DBUILD_TIFF=OFF",
@@ -135,6 +138,11 @@ on_install(function(package)
             table.insert(configs, "-DOPENCV_DISABLE_FILESYSTEM_SUPPORT=ON")
         end
     end
+
+    local cflags = {"-fopenmp","-static-openmp"}
+    local ldflags = {"-fopenmp","-static-openmp"}
+    table.insert(configs, "EXTRA_CFLAGS=" .. table.concat(cflags, " "))
+    table.insert(configs, "LDFLAGS=" .. table.concat(ldflags, " "))
 
     import("package.tools.cmake").install(package, configs)
     --for _, link in ipairs({"opencv_core","opencv_features2d","opencv_highgui","opencv_imgproc","opencv_photo","opencv_video"}) do
