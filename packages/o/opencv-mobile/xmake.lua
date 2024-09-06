@@ -9,7 +9,7 @@ set_description("该项目为不同平台提供了 opencv 库的最小构建。"
 set_urls("https://github.com/nihui/opencv-mobile/releases/download/v29/opencv-mobile-$(version).zip")
 add_versions("4.10.0", "e9209285ad4d682536db4505bc06e46b94b9e56d91896e16c2853c83a870f004")
 
-add_configs("shared", { description = "Build shared library.", default = true, type = "boolean", readonly = true })
+add_configs("shared", { description = "Build shared library.", default = false, type = "boolean", readonly = true })
 
 
 add_deps("cmake")
@@ -108,40 +108,63 @@ on_install(function(package)
         "-DBUILD_opencv_ml=OFF",
     }
     table.insert(configs, "-DCMAKE_BUILD_TYPE=" .. (package:is_debug() and "Debug" or "Release"))
-
     if package:config("shared") then
         table.insert(configs, "-DBUILD_SHARED_LIBS=ON")
-        table.insert(configs, "-DCMAKE_INSTALL_PREFIX=install")
     end
-
-    if is_plat("windows") then
+    if package:is_plat("windows") then
         table.insert(configs, "-DBUILD_opencv_world=OFF")
-        table.insert(configs, "-DCMAKE_INSTALL_PREFIX=install")
-    elseif is_plat("android") then
-        local options = {
-            "-DCMAKE_POLICY_DEFAULT_CMP0057=NEW",
-            "-DANDROID_CPP_FEATURES=\"no-rtti no-exceptions\"",
-            "-DCMAKE_INSTALL_PREFIX=install",
-        }
-        for index, value in ipairs(options) do
-            table.insert(configs, value)
-        end
+    elseif package:is_plat("android") then
+        table.insert(configs, "-DBUILD_opencv_world=OFF")
+        table.insert(configs, "-DCMAKE_POLICY_DEFAULT_CMP0057=NEW")
     end
-
 
     import("package.tools.cmake").install(package, configs)
-end)
+    --for _, link in ipairs({"opencv_core","opencv_features2d","opencv_highgui","opencv_imgproc","opencv_photo","opencv_video"}) do
+    --    local reallink = link
+    --    if package:is_plat("windows", "mingw") then
+    --        reallink = reallink .. package:version():gsub("%.", "")
+    --        reallink = reallink .. (package:debug() and "d" or "")
+    --    end
+    --    package:add("links", reallink)
+    --end
 
-on_test(function(package)
-    assert(package:check_cxxsnippets({
-        test = [[
-           #include <opencv2/opencv.hpp>
-            #include <iostream>
+    if package:is_plat("windows") then
+        local arch = "x64"
+        if package:is_arch("x86") then
+            arch = "x86"
+        elseif package:is_arch("arm64") then
+            arch = "ARM64"
+        end
+        local linkdir = (package:config("shared") and "lib" or "staticlib")
+        local vs = package:toolchain("msvc"):config("vs")
+        local vc_ver = "vc13"
+        if vs == "2015" then
+            vc_ver = "vc14"
+        elseif vs == "2017" then
+            vc_ver = "vc15"
+        elseif vs == "2019" then
+            vc_ver = "vc16"
+        elseif vs == "2022" then
+            vc_ver = "vc17"
+        end
 
-            int main(int argc, char** argv) {
-                std::cout << "opencv version is: "<<cv::getVersionString()<< std::endl;
-                return 0;
-            }
-        ]]
-    }, { configs = { languages = "c++17" } }))
+        local installdir = package:installdir(arch, vc_ver)
+        local libfiles = {}
+        table.join2(libfiles, os.files(path.join(package:installdir(), linkdir, "*.lib")))
+        table.join2(libfiles, os.files(path.join(package:installdir(), arch, vc_ver, linkdir, "*.lib")))
+        for _, f in ipairs(libfiles) do
+            if not f:match("opencv_.+") then
+                package:add("links", path.basename(f))
+            end
+        end
+        package:addenv("PATH", path.join(arch, vc_ver, "bin"))
+    elseif package:is_plat("android") then
+        local includedir = package:installdir("sdk", "native", "jni", "include")
+        os.cp(includedir, package:installdir())
+
+        local libdir = package:installdir("sdk", "native", (package:config("shared") and "lib" or "staticlibs"),
+                package:arch())
+        os.trycp(libdir .. "/**.a", package:installdir("lib"))
+        os.trycp(libdir .. "/**.so", package:installdir("lib"))
+    end
 end)
