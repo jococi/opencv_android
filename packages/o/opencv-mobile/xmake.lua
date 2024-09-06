@@ -118,6 +118,7 @@ on_install(function(package)
     elseif package:is_plat("android") then
         table.insert(configs, "-DCMAKE_POLICY_DEFAULT_CMP0057=NEW")
         table.insert(configs, "-DANDROID_CPP_FEATURES=no-rtti no-exceptions")
+        table.insert(configs, "-DCMAKE_BUILD_PARALLEL=ON")
         if package:is_arch("armeabi-v7a") then
             table.insert(configs, "-DANDROID_ARM_NEON=ON")
             table.insert(configs, "-DBUILD_opencv_world=OFF")
