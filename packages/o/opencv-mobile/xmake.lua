@@ -129,7 +129,7 @@ on_install(function(package)
         elseif package:is_arch("x86") then
             table.insert(configs, "-DBUILD_opencv_world=OFF")
             table.insert(configs, "-DOPENCV_DISABLE_FILESYSTEM_SUPPORT=ON")
-        elseif package:is_arch("armeabi-v7a") then
+        elseif package:is_arch("x86_64") then
             table.insert(configs, "-DBUILD_opencv_world=OFF")
             table.insert(configs, "-DOPENCV_DISABLE_FILESYSTEM_SUPPORT=ON")
         end
